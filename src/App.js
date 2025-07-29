@@ -4,7 +4,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import NavBar from './components/NavBar';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
-import HabitsPage from './pages/HabitsPage';
+import DashboardPage from './pages/DashboardPage';
 import LogsPage from './pages/LogsPage';
 import HomePage from './pages/HomePage';
 import RequireAuth from './components/RequireAuth';
@@ -21,7 +21,7 @@ function App() {
           path="/habits"
           element={
             <RequireAuth>
-              <HabitsPage />
+              <DashboardPage />
             </RequireAuth>
           }
         />
