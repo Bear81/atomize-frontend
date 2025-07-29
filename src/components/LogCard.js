@@ -1,33 +1,29 @@
+// 📄 src/components/LogCard.js
+
 import React, { useState } from 'react';
 import Card from 'react-bootstrap/Card';
 import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
 import Stack from 'react-bootstrap/Stack';
+import Alert from 'react-bootstrap/Alert';
 import axios from '../api/axiosDefaults';
 
-const LogCard = ({ log, onDelete, onUpdate }) => {
+const LogCard = ({ log, habits, onUpdate, onDelete }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [note, setNote] = useState(log.note || '');
-  const [status, setStatus] = useState(log.status || '');
-  const [saving, setSaving] = useState(false);
+  const [status, setStatus] = useState(log.status || 'pending');
   const [error, setError] = useState('');
+  const [saving, setSaving] = useState(false);
 
-  const handleDelete = async () => {
-    const confirm = window.confirm('Delete this log entry?');
-    if (!confirm) return;
-
-    try {
-      await axios.delete(`/habits/logs/${log.id}/`);
-      onDelete(log.id);
-    } catch (err) {
-      console.error(err);
-      setError('Failed to delete log.');
-    }
+  const handleEditToggle = () => {
+    setIsEditing(!isEditing);
+    setError('');
   };
 
-  const handleSave = async () => {
+  const handleUpdate = async () => {
     setSaving(true);
     setError('');
+
     try {
       const { data } = await axios.patch(`/habits/logs/${log.id}/`, {
         note,
@@ -36,35 +32,41 @@ const LogCard = ({ log, onDelete, onUpdate }) => {
       onUpdate(data);
       setIsEditing(false);
     } catch (err) {
-      console.error(err);
+      console.error('Update failed:', err);
       setError('Failed to update log.');
     } finally {
       setSaving(false);
     }
   };
 
+  const handleDelete = async () => {
+    const confirmDelete = window.confirm('Delete this log entry?');
+    if (!confirmDelete) return;
+
+    try {
+      await axios.delete(`/habits/logs/${log.id}/`);
+      onDelete(log.id);
+    } catch (err) {
+      console.error('Delete failed:', err);
+      setError('Failed to delete log.');
+    }
+  };
+
+  const habitTitle =
+    habits.find((h) => h.id === log.habit)?.title || `Habit ID: ${log.habit}`;
+
   return (
-    <Card className="mb-3 shadow-sm">
+    <Card className="mb-3 shadow-sm rounded">
       <Card.Body>
-        <Card.Title>{log.habit_title || `Habit ID ${log.habit}`}</Card.Title>
-        <Card.Subtitle className="mb-2 text-muted">
-          {new Date(log.timestamp).toLocaleString()}
-        </Card.Subtitle>
+        <Card.Title className="d-flex justify-content-between">
+          {habitTitle}
+          <span className="text-muted small">
+            {new Date(log.timestamp).toLocaleString()}
+          </span>
+        </Card.Title>
 
         {isEditing ? (
           <>
-            <Form.Group className="mb-2">
-              <Form.Label>Status</Form.Label>
-              <Form.Select
-                value={status}
-                onChange={(e) => setStatus(e.target.value)}
-              >
-                <option value="">— Select —</option>
-                <option value="done">Done</option>
-                <option value="skipped">Skipped</option>
-              </Form.Select>
-            </Form.Group>
-
             <Form.Group className="mb-2">
               <Form.Label>Note</Form.Label>
               <Form.Control
@@ -75,34 +77,42 @@ const LogCard = ({ log, onDelete, onUpdate }) => {
               />
             </Form.Group>
 
-            {error && <div className="text-danger small mb-2">{error}</div>}
+            <Form.Group className="mb-3">
+              <Form.Label>Status</Form.Label>
+              <Form.Select
+                value={status}
+                onChange={(e) => setStatus(e.target.value)}
+              >
+                <option value="done">Done</option>
+                <option value="skipped">Skipped</option>
+                <option value="partial">Partial</option>
+              </Form.Select>
+            </Form.Group>
 
             <Stack direction="horizontal" gap={2}>
-              <Button variant="success" onClick={handleSave} disabled={saving}>
-                {saving ? 'Saving...' : 'Save'}
+              <Button
+                variant="success"
+                onClick={handleUpdate}
+                disabled={saving}
+              >
+                Save
               </Button>
-              <Button variant="secondary" onClick={() => setIsEditing(false)}>
+              <Button variant="outline-secondary" onClick={handleEditToggle}>
                 Cancel
               </Button>
             </Stack>
           </>
         ) : (
           <>
-            {status && (
-              <Card.Text>
-                <strong>Status:</strong> {status}
-              </Card.Text>
-            )}
-            {note && (
-              <Card.Text>
-                <strong>Note:</strong> {note}
-              </Card.Text>
-            )}
+            <Card.Text>
+              <strong>Note:</strong> {log.note}
+            </Card.Text>
+            <Card.Text>
+              <strong>Status:</strong> {log.status}
+            </Card.Text>
+
             <Stack direction="horizontal" gap={2}>
-              <Button
-                variant="outline-primary"
-                onClick={() => setIsEditing(true)}
-              >
+              <Button variant="outline-primary" onClick={handleEditToggle}>
                 Edit
               </Button>
               <Button variant="outline-danger" onClick={handleDelete}>
@@ -110,6 +120,12 @@ const LogCard = ({ log, onDelete, onUpdate }) => {
               </Button>
             </Stack>
           </>
+        )}
+
+        {error && (
+          <Alert variant="danger" className="mt-2 mb-0 py-1 small">
+            {error}
+          </Alert>
         )}
       </Card.Body>
     </Card>
