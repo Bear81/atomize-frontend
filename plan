@@ -1,0 +1,33 @@
+🔨 Build Plan (Final Sprint)
+🔢 Order of Execution
+
+1. 📝 Logs Feature Set
+   LogsPage.js fetch and display /habits/logs/ - Done
+
+Filter logs by habit/date
+
+Edit + Delete log entries
+
+2. 🔁 Habit Management
+   Edit Habit modal (prefilled form)
+
+Delete Habit confirmation
+
+3. 🧪 Testing & Manual Checks
+   Validate forms, feedback, route protection
+
+Manual test table for README
+
+4. 📚 Documentation & Deployment
+   Complete README: goals, features, screenshots, references
+
+Final Heroku + Netlify deployment
+
+Confirm .env, routes, URLs, and axios base URLs are clean
+
+5. ✨ (If Time) UX Improvements
+   Bootstrap theme override (color palette, shadow, spacing)
+
+Google Fonts + background tweaks
+
+Toasts and skeleton loaders for visual polish
