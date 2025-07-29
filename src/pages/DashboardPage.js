@@ -18,6 +18,9 @@ const DashboardPage = () => {
   const handleHabitUpdate = (updated) => {
     setHabits((prev) => prev.map((h) => (h.id === updated.id ? updated : h)));
   };
+  const handleHabitDelete = (id) => {
+    setHabits((prev) => prev.filter((h) => h.id !== id));
+  };
 
   useEffect(() => {
     const fetchHabits = async () => {
@@ -39,6 +42,23 @@ const DashboardPage = () => {
     console.log(`Log clicked for habit ID: ${id}`);
     // 🔜 Replace with POST to /logs/ or modal trigger
   };
+
+  useEffect(() => {
+    const fetchHabits = async () => {
+      try {
+        const { data } = await axios.get('/habits/');
+        console.log('Fetched habits:', data);
+        setHabits(data);
+      } catch (err) {
+        console.error('Error fetching habits:', err);
+        setError('Failed to load habits.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchHabits();
+  }, []);
 
   return (
     <Container className="py-4">
@@ -74,6 +94,7 @@ const DashboardPage = () => {
           habits={habits}
           onLogClick={handleLogHabit}
           onHabitUpdate={handleHabitUpdate}
+          onHabitDelete={handleHabitDelete}
         />
       )}
     </Container>

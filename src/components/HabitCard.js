@@ -1,161 +1,138 @@
-import React, { useState, useEffect } from 'react';
-import { Modal, Button, Form, Spinner, Alert } from 'react-bootstrap';
+import React, { useState } from 'react';
+import Card from 'react-bootstrap/Card';
+import Button from 'react-bootstrap/Button';
+import Badge from 'react-bootstrap/Badge';
+import Stack from 'react-bootstrap/Stack';
 import axios from '../api/axiosDefaults';
+import EditHabitForm from './EditHabitForm';
 
-const EditHabitForm = ({ show, onHide, habit, onHabitUpdated }) => {
-  const [formData, setFormData] = useState({
-    title: '',
-    description: '',
-    goal_type: 'daily',
-    frequency: 1,
-    priority: 'medium',
-  });
+const HabitCard = ({
+  id,
+  title,
+  description,
+  frequency,
+  goalType,
+  priority,
+  status: initialStatus,
+  onLogClick,
+  onHabitUpdated,
+  onHabitDeleted,
+}) => {
+  const [status, setStatus] = useState(initialStatus || 'Pending');
+  const [logging, setLogging] = useState(false);
+  const [error, setError] = useState('');
+  const [showEdit, setShowEdit] = useState(false);
 
-  const [errors, setErrors] = useState({});
-  const [submitting, setSubmitting] = useState(false);
-  const [serverError, setServerError] = useState('');
+  const priorityColor =
+    {
+      low: 'success',
+      medium: 'warning',
+      high: 'danger',
+    }[priority] || 'secondary';
 
-  // Populate form when habit changes
-  useEffect(() => {
-    if (habit) {
-      setFormData({
-        title: habit.title || '',
-        description: habit.description || '',
-        goal_type: habit.goal_type || 'daily',
-        frequency: habit.frequency || 1,
-        priority: habit.priority || 'medium',
-      });
-    }
-  }, [habit]);
+  const statusBadge = (
+    <Badge bg="info" className="ms-auto text-capitalize">
+      {status}
+    </Badge>
+  );
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const validate = () => {
-    const newErrors = {};
-    if (!formData.title.trim()) newErrors.title = 'Title is required.';
-    if (formData.frequency <= 0) newErrors.frequency = 'Must be at least 1.';
-    return newErrors;
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    const validationErrors = validate();
-    if (Object.keys(validationErrors).length) {
-      setErrors(validationErrors);
-      return;
-    }
-
-    setSubmitting(true);
-    setErrors({});
-    setServerError('');
+  const handleLogClick = async () => {
+    setLogging(true);
+    setError('');
 
     try {
-      const { data } = await axios.patch(`/habits/${habit.id}/`, formData);
-      onHabitUpdated(data); // pass updated habit back to parent
-      onHide(); // close modal
+      await axios.post('/habits/logs/', { habit: id });
+      setStatus('Done');
     } catch (err) {
-      console.error(err);
-      setServerError('Failed to update habit.');
+      console.error('Log error:', err);
+      setError('Failed to log habit.');
     } finally {
-      setSubmitting(false);
+      setLogging(false);
+    }
+  };
+
+  const handleHabitUpdate = (updatedHabit) => {
+    onHabitUpdated(updatedHabit);
+    setShowEdit(false);
+  };
+
+  const handleDelete = async () => {
+    const confirmed = window.confirm('Delete this habit?');
+    if (!confirmed) return;
+
+    try {
+      await axios.delete(`/habits/${id}/`);
+      onHabitDeleted(id);
+    } catch (err) {
+      console.error('Delete error:', err);
+      alert('Failed to delete habit.');
     }
   };
 
   return (
-    <Modal show={show} onHide={onHide} centered>
-      <Modal.Header closeButton>
-        <Modal.Title>Edit Habit</Modal.Title>
-      </Modal.Header>
-      <Form onSubmit={handleSubmit}>
-        <Modal.Body>
-          {serverError && <Alert variant="danger">{serverError}</Alert>}
+    <>
+      <Card className="mb-3 shadow-sm rounded">
+        <Card.Body>
+          <Card.Title className="d-flex justify-content-between align-items-center">
+            {title}
+            <Badge bg={priorityColor} className="text-uppercase">
+              {priority}
+            </Badge>
+          </Card.Title>
+          <Card.Subtitle className="mb-2 text-muted">
+            {goalType} - {frequency}
+          </Card.Subtitle>
+          <Card.Text>{description}</Card.Text>
 
-          <Form.Group className="mb-3">
-            <Form.Label>Title</Form.Label>
-            <Form.Control
-              name="title"
-              value={formData.title}
-              onChange={handleChange}
-              isInvalid={!!errors.title}
-              required
-            />
-            <Form.Control.Feedback type="invalid">
-              {errors.title}
-            </Form.Control.Feedback>
-          </Form.Group>
-
-          <Form.Group className="mb-3">
-            <Form.Label>Description</Form.Label>
-            <Form.Control
-              name="description"
-              value={formData.description}
-              onChange={handleChange}
-              as="textarea"
-              rows={2}
-            />
-          </Form.Group>
-
-          <Form.Group className="mb-3">
-            <Form.Label>Goal Type</Form.Label>
-            <Form.Select
-              name="goal_type"
-              value={formData.goal_type}
-              onChange={handleChange}
+          <Stack direction="horizontal" gap={3} className="mb-2">
+            <Button
+              variant="primary"
+              className="flex-grow-1"
+              onClick={handleLogClick}
+              disabled={logging || status === 'Done'}
             >
-              <option value="daily">Daily</option>
-              <option value="weekly">Weekly</option>
-              <option value="monthly">Monthly</option>
-            </Form.Select>
-          </Form.Group>
+              {logging ? 'Logging...' : 'Log Habit'}
+            </Button>
+            {statusBadge}
+          </Stack>
 
-          <Form.Group className="mb-3">
-            <Form.Label>Frequency</Form.Label>
-            <Form.Control
-              name="frequency"
-              type="number"
-              min={1}
-              value={formData.frequency}
-              onChange={handleChange}
-              isInvalid={!!errors.frequency}
-              required
-            />
-            <Form.Control.Feedback type="invalid">
-              {errors.frequency}
-            </Form.Control.Feedback>
-          </Form.Group>
-
-          <Form.Group className="mb-3">
-            <Form.Label>Priority</Form.Label>
-            <Form.Select
-              name="priority"
-              value={formData.priority}
-              onChange={handleChange}
+          <Stack direction="horizontal" gap={2}>
+            <Button
+              variant="outline-secondary"
+              onClick={() => setShowEdit(true)}
             >
-              <option value="low">Low</option>
-              <option value="medium">Medium</option>
-              <option value="high">High</option>
-            </Form.Select>
-          </Form.Group>
-        </Modal.Body>
+              Edit
+            </Button>
+            <Button variant="outline-danger" onClick={handleDelete}>
+              Delete
+            </Button>
+          </Stack>
 
-        <Modal.Footer>
-          <Button variant="secondary" onClick={onHide} disabled={submitting}>
-            Cancel
-          </Button>
-          <Button variant="primary" type="submit" disabled={submitting}>
-            {submitting ? (
-              <Spinner animation="border" size="sm" />
-            ) : (
-              'Save Changes'
-            )}
-          </Button>
-        </Modal.Footer>
-      </Form>
-    </Modal>
+          {error && (
+            <div className="text-danger mt-2 small">
+              <strong>{error}</strong>
+            </div>
+          )}
+        </Card.Body>
+      </Card>
+
+      {showEdit && (
+        <EditHabitForm
+          show={showEdit}
+          onHide={() => setShowEdit(false)}
+          habit={{
+            id,
+            title,
+            description,
+            frequency,
+            goal_type: goalType,
+            priority,
+          }}
+          onHabitUpdated={handleHabitUpdate}
+        />
+      )}
+    </>
   );
 };
 
-export default EditHabitForm;
+export default HabitCard;
