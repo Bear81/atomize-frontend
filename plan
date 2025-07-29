@@ -1,13 +1,3 @@
-🔨 Build Plan (Final Sprint)
-🔢 Order of Execution
-
-1. 📝 Logs Feature Set
-   LogsPage.js fetch and display /habits/logs/ - Done
-
-Filter logs by habit/date
-
-Edit + Delete log entries
-
 2. 🔁 Habit Management
    Edit Habit modal (prefilled form)
 
@@ -31,3 +21,5 @@ Confirm .env, routes, URLs, and axios base URLs are clean
 Google Fonts + background tweaks
 
 Toasts and skeleton loaders for visual polish
+
+Remove Model from component names and exports

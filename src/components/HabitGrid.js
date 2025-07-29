@@ -4,7 +4,7 @@ import Col from 'react-bootstrap/Col';
 import HabitCard from './HabitCard';
 import Alert from 'react-bootstrap/Alert';
 
-const HabitGrid = ({ habits, onLogClick }) => {
+const HabitGrid = ({ habits, onLogClick, onHabitUpdate }) => {
   if (!habits.length) {
     return <Alert variant="info">No habits to display.</Alert>;
   }
@@ -22,6 +22,10 @@ const HabitGrid = ({ habits, onLogClick }) => {
             goalType={habit.goal_type}
             priority={habit.priority}
             status={habit.status}
+            onLogClick={() => onLogClick(habit.id)}
+            onHabitUpdated={(updatedHabit) =>
+              onHabitUpdate && onHabitUpdate(updatedHabit)
+            }
           />
         </Col>
       ))}

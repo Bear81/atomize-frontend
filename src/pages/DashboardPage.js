@@ -15,6 +15,9 @@ const DashboardPage = () => {
   const handleHabitCreated = (newHabit) => {
     setHabits((prev) => [newHabit, ...prev]);
   };
+  const handleHabitUpdate = (updated) => {
+    setHabits((prev) => prev.map((h) => (h.id === updated.id ? updated : h)));
+  };
 
   useEffect(() => {
     const fetchHabits = async () => {
@@ -67,7 +70,11 @@ const DashboardPage = () => {
       />
 
       {!loading && habits.length > 0 && (
-        <HabitGrid habits={habits} onLogClick={handleLogHabit} />
+        <HabitGrid
+          habits={habits}
+          onLogClick={handleLogHabit}
+          onHabitUpdate={handleHabitUpdate}
+        />
       )}
     </Container>
   );
