@@ -1,19 +1,25 @@
-import React from 'react';
+// 📄 src/components/HabitCard.js
+
+import React, { useState } from 'react';
 import Card from 'react-bootstrap/Card';
 import Button from 'react-bootstrap/Button';
 import Badge from 'react-bootstrap/Badge';
 import Stack from 'react-bootstrap/Stack';
+import axios from '../api/axiosDefaults';
 
 const HabitCard = ({
+  id,
   title,
   description,
   frequency,
   goalType,
   priority,
-  onLogClick,
-  status,
+  status: initialStatus,
 }) => {
-  // Map priority to Bootstrap color
+  const [status, setStatus] = useState(initialStatus || 'Pending');
+  const [logging, setLogging] = useState(false);
+  const [error, setError] = useState('');
+
   const priorityColor =
     {
       low: 'success',
@@ -21,12 +27,29 @@ const HabitCard = ({
       high: 'danger',
     }[priority] || 'secondary';
 
-  // Optional: Status label
-  const statusBadge = status ? (
-    <Badge bg="info" className="ms-auto">
+  const statusBadge = (
+    <Badge bg="info" className="ms-auto text-capitalize">
       {status}
     </Badge>
-  ) : null;
+  );
+
+  const handleLogClick = async () => {
+    setLogging(true);
+    setError('');
+
+    try {
+      await axios.post('/habits/logs/', {
+        habit: id,
+      });
+
+      setStatus('Done');
+    } catch (err) {
+      console.error('Log error:', err);
+      setError('Failed to log habit.');
+    } finally {
+      setLogging(false);
+    }
+  };
 
   return (
     <Card className="mb-3 shadow-sm rounded">
@@ -46,12 +69,19 @@ const HabitCard = ({
           <Button
             variant="primary"
             className="flex-grow-1"
-            onClick={onLogClick}
+            onClick={handleLogClick}
+            disabled={logging || status === 'Done'}
           >
-            Log Habit
+            {logging ? 'Logging...' : 'Log Habit'}
           </Button>
           {statusBadge}
         </Stack>
+
+        {error && (
+          <div className="text-danger mt-2 small">
+            <strong>{error}</strong>
+          </div>
+        )}
       </Card.Body>
     </Card>
   );

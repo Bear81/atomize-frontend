@@ -14,13 +14,14 @@ const HabitGrid = ({ habits, onLogClick }) => {
       {habits.map((habit) => (
         <Col key={habit.id}>
           <HabitCard
+            key={habit.id}
+            id={habit.id}
             title={habit.title}
             description={habit.description}
             frequency={habit.frequency}
             goalType={habit.goal_type}
             priority={habit.priority}
             status={habit.status}
-            onLogClick={() => onLogClick(habit.id)}
           />
         </Col>
       ))}
