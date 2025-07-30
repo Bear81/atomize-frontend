@@ -1,9 +1,11 @@
 import axios from 'axios';
 
 axios.defaults.baseURL =
-  process.env.REACT_APP_BACKEND_URL || 'http://localhost:8000';
+  process.env.REACT_APP_BACKEND_URL || 'http://localhost:8000/';
 
 axios.defaults.withCredentials = true;
+
+axios.defaults.headers.post['Content-Type'] = 'application/json';
 
 function getCookie(name) {
   let cookieValue = null;

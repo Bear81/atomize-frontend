@@ -15,13 +15,11 @@ export const AuthProvider = ({ children }) => {
         const { data } = await axios.get('/dj-rest-auth/user/');
         setCurrentUser(data);
       } catch (err) {
-        if (err.response?.status === 403 || err.response?.status === 401) {
-          setCurrentUser(null); // Unauthenticated, not an error
+        if (err.response?.status === 403) {
+          setCurrentUser(null);
         } else {
           console.error('Auth error:', err);
         }
-      } finally {
-        setAuthLoading(false);
       }
     };
 
