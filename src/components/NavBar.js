@@ -9,13 +9,23 @@ const NavBar = () => {
   const { currentUser, setCurrentUser } = useContext(AuthContext);
   const navigate = useNavigate();
 
+  function getCookie(name) {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(';').shift();
+  }
+
   const handleLogout = async () => {
     try {
-      await axios.post('/dj-rest-auth/logout/');
-      setCurrentUser(null);
-      navigate('/login');
+      await axios.post('/dj-rest-auth/logout/', null, {
+        headers: {
+          'X-CSRFToken': getCookie('csrftoken'),
+        },
+      });
+      setCurrentUser(null); // Clear context state
+      navigate('/login'); // Redirect
     } catch (err) {
-      console.error('Logout error:', err);
+      console.error('Logout failed:', err);
     }
   };
 
