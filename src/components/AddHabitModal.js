@@ -2,6 +2,11 @@ import React, { useState } from 'react';
 import { Modal, Button, Form, Spinner, Alert } from 'react-bootstrap';
 import axios from '../api/axiosDefaults';
 
+function getCookie(name) {
+  const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+  return match ? match[2] : null;
+}
+
 const AddHabitModal = ({ show, onHide, onHabitCreated }) => {
   const [formData, setFormData] = useState({
     title: '',
@@ -40,7 +45,11 @@ const AddHabitModal = ({ show, onHide, onHabitCreated }) => {
     setServerError('');
 
     try {
-      const { data } = await axios.post('/habits/', formData);
+      const { data } = await await axios.post('/habits/', formData, {
+        headers: {
+          'X-CSRFToken': getCookie('csrftoken'),
+        },
+      });
       onHabitCreated(data);
       onHide();
     } catch (err) {
