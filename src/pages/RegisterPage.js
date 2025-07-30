@@ -1,9 +1,8 @@
-// 📄 src/pages/RegisterPage.js
-
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { Form, Button, Container, Alert, Spinner } from 'react-bootstrap';
 import axios from '../api/axiosDefaults';
 import { useNavigate } from 'react-router-dom';
+import { AuthContext } from '../contexts/AuthContext';
 
 const RegisterPage = () => {
   const [formData, setFormData] = useState({
@@ -22,6 +21,7 @@ const RegisterPage = () => {
     setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
+  const { setCurrentUser } = useContext(AuthContext);
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmitting(true);
@@ -30,7 +30,12 @@ const RegisterPage = () => {
 
     try {
       await axios.post('/dj-rest-auth/registration/', formData);
-      navigate('/login');
+
+      // ✅ Immediately fetch the logged-in user
+      const { data } = await axios.get('/dj-rest-auth/user/');
+      setCurrentUser(data); // 👈 this updates the auth context
+
+      navigate('/'); // ✅ Go to dashboard/homepage
     } catch (err) {
       console.error('Registration failed:', err);
       if (err.response?.data) {
