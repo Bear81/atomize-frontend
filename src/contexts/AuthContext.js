@@ -1,3 +1,5 @@
+// src/contexts/AuthContext.js
+
 import React, { createContext, useState, useEffect } from 'react';
 import axios from '../api/axiosDefaults';
 
@@ -13,10 +15,10 @@ export const AuthProvider = ({ children }) => {
         const { data } = await axios.get('/dj-rest-auth/user/');
         setCurrentUser(data);
       } catch (err) {
-        if (err.response?.status === 403) {
-          setCurrentUser(null);
-        } else {
-          console.error('Auth error:', err);
+        // If session expired or invalid cookie, clear user
+        setCurrentUser(null);
+        if (err.response?.status !== 403) {
+          console.error('Auth check error:', err);
         }
       } finally {
         setAuthLoading(false);
