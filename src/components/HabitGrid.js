@@ -3,6 +3,7 @@ import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import HabitCard from './HabitCard';
 import Alert from 'react-bootstrap/Alert';
+import axios from '../api/axiosDefaults';
 
 const HabitGrid = ({ habits, onLogClick, onHabitUpdate, onHabitDelete }) => {
   if (!habits.length) {

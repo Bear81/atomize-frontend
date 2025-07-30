@@ -1,6 +1,7 @@
 import React, { useContext } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { AuthContext } from '../contexts/AuthContext';
+import axios from '../api/axiosDefaults';
 
 export default function RequireAuth({ children }) {
   const { currentUser } = useContext(AuthContext);

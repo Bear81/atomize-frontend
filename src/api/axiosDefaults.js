@@ -1,12 +1,17 @@
+// 📄 src/api/axiosDefaults.js
 import axios from 'axios';
 
-// Set base URL from environment
+// ✅ Base API URL (env var or local fallback)
 axios.defaults.baseURL =
   process.env.REACT_APP_BACKEND_URL || 'http://localhost:8000/';
+
+// ✅ Send credentials with every request
 axios.defaults.withCredentials = true;
+
+// ✅ Required for POSTs
 axios.defaults.headers.post['Content-Type'] = 'application/json';
 
-// Helper to extract csrftoken from cookies
+// ✅ Attach CSRF token from cookies
 function getCookie(name) {
   let cookieValue = null;
   if (document.cookie && document.cookie !== '') {
@@ -22,12 +27,10 @@ function getCookie(name) {
   return cookieValue;
 }
 
-// Attach CSRF token to every unsafe method
 axios.interceptors.request.use((config) => {
   const method = config.method?.toUpperCase();
   if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(method)) {
     const csrfToken = getCookie('csrftoken');
-    console.log('✅ Attaching CSRF token:', csrfToken); // TEMP debug
     if (csrfToken) {
       config.headers['X-CSRFToken'] = csrfToken;
     }

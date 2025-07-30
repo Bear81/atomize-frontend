@@ -1,3 +1,5 @@
+import axios from '../api/axiosDefaults';
+
 export default function HomePage() {
   return <h1>Welcome to Atomize - HomePage</h1>;
 }

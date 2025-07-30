@@ -20,6 +20,8 @@ export const AuthProvider = ({ children }) => {
         } else {
           console.error('Auth error:', err);
         }
+      } finally {
+        setAuthLoading(false);
       }
     };
 
