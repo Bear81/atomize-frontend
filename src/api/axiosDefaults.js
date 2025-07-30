@@ -1,31 +1,39 @@
 // 📄 src/api/axiosDefaults.js
 import axios from 'axios';
 
-// Use correct env var name
+// Set base URL from env
 axios.defaults.baseURL =
   process.env.REACT_APP_BACKEND_URL || 'http://localhost:8000';
+
+// Send cookies on cross-site requests
 axios.defaults.withCredentials = true;
 
-// ✅ Automatically include CSRF token from cookies
+// ✅ Automatically attach CSRF token
 axios.interceptors.request.use(
   (config) => {
-    const getCookie = (name) => {
-      const cookieValue = document.cookie
-        .split('; ')
-        .find((row) => row.startsWith(name + '='))
-        ?.split('=')[1];
-      return cookieValue || '';
-    };
-
-    const csrftoken = getCookie('csrftoken');
-
-    if (!config.headers['X-CSRFToken']) {
-      config.headers['X-CSRFToken'] = csrftoken;
+    const csrfToken = getCookie('csrftoken');
+    if (csrfToken && !config.headers['X-CSRFToken']) {
+      config.headers['X-CSRFToken'] = csrfToken;
     }
-
     return config;
   },
   (error) => Promise.reject(error)
 );
+
+// Helper to read cookie
+function getCookie(name) {
+  let cookieValue = null;
+  if (document.cookie && document.cookie !== '') {
+    const cookies = document.cookie.split(';');
+    for (let cookie of cookies) {
+      cookie = cookie.trim();
+      if (cookie.startsWith(name + '=')) {
+        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+        break;
+      }
+    }
+  }
+  return cookieValue;
+}
 
 export default axios;
