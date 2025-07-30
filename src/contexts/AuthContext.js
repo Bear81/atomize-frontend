@@ -1,11 +1,13 @@
-import { createContext, useState, useEffect } from 'react';
+// 📄 src/contexts/AuthContext.js
+
+import React, { createContext, useState, useEffect } from 'react';
 import axios from '../api/axiosDefaults';
 
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [currentUser, setCurrentUser] = useState(null);
-  const [loaded, setLoaded] = useState(false);
+  const [authLoading, setAuthLoading] = useState(true);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -13,16 +15,22 @@ export const AuthProvider = ({ children }) => {
         const { data } = await axios.get('/dj-rest-auth/user/');
         setCurrentUser(data);
       } catch (err) {
-        setCurrentUser(null);
+        if (err.response?.status === 403 || err.response?.status === 401) {
+          setCurrentUser(null); // Unauthenticated, not an error
+        } else {
+          console.error('Auth error:', err);
+        }
+      } finally {
+        setAuthLoading(false);
       }
-      setLoaded(true);
     };
+
     fetchUser();
   }, []);
 
   return (
-    <AuthContext.Provider value={{ currentUser, setCurrentUser }}>
-      {loaded ? children : <p>Loading...</p>}
+    <AuthContext.Provider value={{ currentUser, setCurrentUser, authLoading }}>
+      {children}
     </AuthContext.Provider>
   );
 };
