@@ -3,11 +3,6 @@ import { Modal, Button, Form, Spinner, Alert } from 'react-bootstrap';
 import axios from '../api/axiosDefaults';
 
 function getCookie(name) {
-  const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
-  return match ? match[2] : null;
-}
-
-function getCookie(name) {
   const value = `; ${document.cookie}`;
   const parts = value.split(`; ${name}=`);
   if (parts.length === 2) return parts.pop().split(';').shift();
@@ -51,7 +46,7 @@ const AddHabitModal = ({ show, onHide, onHabitCreated }) => {
     setServerError('');
 
     try {
-      const { data } = await await axios.post('/habits/', formData, {
+      const { data } = await axios.post('/habits/', formData, {
         headers: {
           'X-CSRFToken': getCookie('csrftoken'),
         },
