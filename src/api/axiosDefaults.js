@@ -1,12 +1,7 @@
 // 📄 src/api/axiosDefaults.js
 import axios from 'axios';
 
-axios.defaults.baseURL =
-  process.env.REACT_APP_BACKEND_URL || 'http://localhost:8000';
-axios.defaults.withCredentials = true;
-axios.defaults.headers.post['Content-Type'] = 'application/json';
-
-// 🔐 Helper to extract csrftoken from cookies
+// Grab CSRF token from cookies
 function getCookie(name) {
   let cookieValue = null;
   if (document.cookie && document.cookie !== '') {
@@ -22,16 +17,15 @@ function getCookie(name) {
   return cookieValue;
 }
 
-// 🔄 Automatically attach CSRF token to modifying requests
-axios.interceptors.request.use((config) => {
-  const method = config.method?.toUpperCase();
-  if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(method)) {
-    const csrfToken = getCookie('csrftoken');
-    if (csrfToken) {
-      config.headers['X-CSRFToken'] = csrfToken;
-    }
-  }
-  return config;
-});
+// Set the backend API URL from .env.production
+axios.defaults.baseURL =
+  process.env.REACT_APP_BACKEND_URL || 'http://localhost:8000/';
+
+// Always send cookies
+axios.defaults.withCredentials = true;
+
+// Set default headers manually
+axios.defaults.headers.common['X-CSRFToken'] = getCookie('csrftoken');
+axios.defaults.headers.post['Content-Type'] = 'application/json';
 
 export default axios;
