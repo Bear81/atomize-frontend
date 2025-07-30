@@ -1,43 +1,30 @@
 // 📄 src/api/axiosDefaults.js
-
 import axios from 'axios';
 
-// ✅ Set the backend API base URL
+// Detect baseURL from env or fallback
 axios.defaults.baseURL =
-  process.env.REACT_APP_BACKEND_URL || 'http://localhost:8000';
+  process.env.REACT_APP_BACKEND_URL || 'http://localhost:8000/';
 
-// ✅ Allow credentials like sessionid and csrftoken to be sent with requests
+// Make sure cookies (sessionid + csrf) are sent
 axios.defaults.withCredentials = true;
 
-// ✅ CSRF interceptor for unsafe methods
-axios.interceptors.request.use((config) => {
-  const csrfToken = getCookie('csrftoken');
+// Extract CSRF token from cookie and attach to request headers
+axios.interceptors.request.use(
+  (config) => {
+    const getCookie = (name) => {
+      const value = `; ${document.cookie}`;
+      const parts = value.split(`; ${name}=`);
+      if (parts.length === 2) return parts.pop().split(';').shift();
+    };
 
-  if (csrfToken && ['post', 'put', 'patch', 'delete'].includes(config.method)) {
-    config.headers['X-CSRFToken'] = csrfToken;
-  }
-
-  return config;
-});
-
-// ✅ Cookie reader helper
-function getCookie(name) {
-  let cookieValue = null;
-
-  if (document.cookie && document.cookie !== '') {
-    const cookies = document.cookie.split(';');
-
-    for (let cookie of cookies) {
-      cookie = cookie.trim();
-
-      if (cookie.startsWith(name + '=')) {
-        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-        break;
-      }
+    const csrfToken = getCookie('csrftoken');
+    if (csrfToken) {
+      config.headers['X-CSRFToken'] = csrfToken;
     }
-  }
 
-  return cookieValue;
-}
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
 
 export default axios;
