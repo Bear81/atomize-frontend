@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 axios.defaults.baseURL =
-  process.env.REACT_APP_API_URL_BACKEND_URL || 'http://localhost:8000/';
+  process.env.REACT_APP_BACKEND_URL || 'http://localhost:8000/';
 axios.defaults.headers.post['Content-Type'] = 'application/json';
 axios.defaults.withCredentials = true;
 
